@@ -13,12 +13,12 @@ public:
     
     ~Minbox();
 
-    void ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr planeHull, BoxQ box);
+    void ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr planeHull, BoxQ& box);
 
 private:
     float ComputeAreaAlongOneEdge(typename pcl::PointCloud<PointT>::Ptr planeHull,
                                   size_t first_in_point, Eigen::Vector3f* center,
-                                  float* lenth, float* width, Eigen::Vector3f* dir, BoxQ box);
+                                  float* lenth, float* width, Eigen::Vector3f* dir, BoxQ& box);
 };
 
 template<typename PointT>
@@ -33,7 +33,7 @@ float Minbox<PointT>::ComputeAreaAlongOneEdge(
         typename pcl::PointCloud<PointT>::Ptr planeHull,
         size_t first_in_point, Eigen::Vector3f* center,
         float* lenth, float* width, Eigen::Vector3f* dir,
-        BoxQ box){
+        BoxQ& box){
     std::vector<Eigen::Vector3f> ns;
     Eigen::Vector3f v(0.0, 0.0, 0.0);
     Eigen::Vector3f vn(0.0, 0.0, 0.0);
@@ -117,7 +117,7 @@ float Minbox<PointT>::ComputeAreaAlongOneEdge(
 
 
 template<typename PointT>
-void Minbox<PointT>::ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr planeHull, BoxQ box) 
+void Minbox<PointT>::ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr planeHull, BoxQ& box)
 {
     if (planeHull->points.size() <= 0) {
         return;
@@ -152,9 +152,9 @@ void Minbox<PointT>::ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr pl
     }
     //以下代码为筛选有效边长,如果相邻的两个点在line的后面,则因为遮挡原因,视这条边为无效边
     //draw a line with left-most point and right-most point
-    Eigen::Vector3f line = max_point - min_point;       
-    double total_len = 0;
-    double max_dis = 0;
+    Eigen::Vector3f line = max_point - min_point;
+    float total_len = 0;
+    float max_dis = 0;
     bool has_out = false;
     for (size_t i = min_point_index, count = 0;
          count < planeHull->points.size();
@@ -172,7 +172,7 @@ void Minbox<PointT>::ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr pl
             Eigen::Vector3f ray = p - min_point;
             //j点在line的靠近雷达一侧
             if (line[0] * ray[1] - ray[0] * line[1] < EPSILON) { 
-                double dist = sqrt((p[0] - p_x[0]) * (p[0] - p_x[0]) +
+                float dist = sqrt((p[0] - p_x[0]) * (p[0] - p_x[0]) +
                                    (p[1] - p_x[1]) * (p[1] - p_x[1]));
                 total_len += dist;
                 if (dist - max_dis > EPSILON) {
@@ -206,7 +206,7 @@ void Minbox<PointT>::ReconstructPolygon(typename pcl::PointCloud<PointT>::Ptr pl
             p[2] = planeHull->points[j].z;
             Eigen::Vector3f ray = p_x - min_point;
             if (line[0] * ray[1] - ray[0] * line[1] < EPSILON) {
-                double dist = sqrt((p[0] - p_x[0]) * (p[0] - p_x[0]) +
+                float dist = sqrt((p[0] - p_x[0]) * (p[0] - p_x[0]) +
                                    (p[1] - p_x[1]) * (p[1] - p_x[1]));
                 total_len += dist;
                 if (dist > max_dis) {

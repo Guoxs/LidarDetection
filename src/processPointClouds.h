@@ -62,7 +62,7 @@ public:
 
     BoxQ minBoxQ(typename pcl::PointCloud<PointT>::Ptr cluster);
 
-    typename pcl::PointCloud<PointT>::Ptr calculate2DHull(
+    void calculate2DHull(
             typename pcl::PointCloud<PointT>::Ptr Cluster2D,
             typename pcl::PointCloud<PointT>::Ptr planeHull);
 };

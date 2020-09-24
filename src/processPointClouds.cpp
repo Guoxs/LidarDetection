@@ -258,7 +258,7 @@ BoxQ ProcessPointClouds<PointT>::minBoxQ(typename pcl::PointCloud<PointT>::Ptr c
     //copy point cloud
     typename pcl::PointCloud<PointT>::Ptr Cluster2D(new pcl::PointCloud<PointT>);
     pcl::copyPointCloud(*cluster, *Cluster2D);
-    //set height to 0
+    //set height to min z
     for(int nIndex = 0; nIndex < Cluster2D->points.size(); nIndex++) {
         Cluster2D->points[nIndex].z = minPoint.z;
     }
@@ -273,19 +273,20 @@ BoxQ ProcessPointClouds<PointT>::minBoxQ(typename pcl::PointCloud<PointT>::Ptr c
     minBox.ReconstructPolygon(planeHull, box);
     // calculate bboxQuaternion
     Eigen::Matrix3f rotational_matrix;
-
     rotational_matrix << box.direction[0], -box.direction[1], 0.0,
                          box.direction[1], box.direction[0], 0.0,
                          0.0, 0.0, 1.0;
-
     Eigen::Quaternionf quat(rotational_matrix);
     box.bboxQuaternion = quat;
+
     box.cube_height = maxPoint.z - minPoint.z;
+    box.bboxTransform[2] += 0.5 * box.cube_height;
+
     return box;
 }
 
 template<typename PointT>
-typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::calculate2DHull(
+void ProcessPointClouds<PointT>::calculate2DHull(
         typename pcl::PointCloud<PointT>::Ptr Cluster2D,
         typename pcl::PointCloud<PointT>::Ptr planeHull)
 {
@@ -294,5 +295,4 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::calculate2DHul
     hull.setDimension(2);
     std::vector<pcl::Vertices> poly_vt;
     hull.Reconstruct2dxy (planeHull, &poly_vt);
-    return planeHull;
 }

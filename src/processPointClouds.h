@@ -16,7 +16,7 @@
 
 #include "DBSCAN/DBSCAN_kdtree.h"
 #include "render/box.h"
-#include "convex_hullxy.h"
+#include "minbox/convex_hullxy.h"
 
 template<typename PointT>
 class ProcessPointClouds {

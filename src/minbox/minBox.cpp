@@ -2,7 +2,7 @@
 // Created by guoxs on 2020/9/24.
 //
 #include <pcl/common/common.h>
-#include "render/box.h"
+#include "../render/box.h"
 
 const float EPSILON = 1e-6;
 

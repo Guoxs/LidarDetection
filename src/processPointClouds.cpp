@@ -2,7 +2,7 @@
 // Created by guoxs on 2020/9/23.
 //
 #include "processPointClouds.h"
-#include "minBox.cpp"
+#include "minbox/minBox.cpp"
 
 //constructor:
 template<typename PointT>

@@ -15,7 +15,8 @@ add_definitions(${PCL_DEFINITIONS})
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
 
-add_executable (lidarDetection src/lidarDetection.cpp src/render/render.cpp src/IO/lidarIO.cpp src/processPointClouds.cpp src/minBox.cpp)
+add_executable (lidarDetection src/lidarDetection.cpp src/render/render.cpp src/IO/lidarIO.cpp
+        src/processPointClouds.cpp src/minbox/minBox.cpp)
 target_link_libraries (lidarDetection ${PCL_LIBRARIES})
 
 

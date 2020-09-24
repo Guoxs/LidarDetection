@@ -2,6 +2,7 @@
 // Created by guoxs on 2020/9/23.
 //
 #include "processPointClouds.h"
+#include "minBox.cpp"
 
 //constructor:
 template<typename PointT>
@@ -212,7 +213,6 @@ BoxQ ProcessPointClouds<PointT>::boundingBoxQ(typename pcl::PointCloud<PointT>::
     PointT minPoint, maxPoint;
     pcl::getMinMax3D(*cluster, minPoint, maxPoint);
 
-    BoxQ box;
     // OBB
     PointT min_point_OBB;
     PointT max_point_OBB;
@@ -239,11 +239,60 @@ BoxQ ProcessPointClouds<PointT>::boundingBoxQ(typename pcl::PointCloud<PointT>::
     float cube_width = max_point_OBB.y - min_point_OBB.y;
 //    float cube_height = max_point_OBB.z - min_point_OBB.z;
 
+    BoxQ box;
     box.bboxTransform = trans;
     box.bboxQuaternion = quat;
     box.cube_height = maxPoint.z - minPoint.z;
     box.cube_length = cube_length;
     box.cube_width = cube_width;
-
     return box;
+}
+
+template<typename PointT>
+BoxQ ProcessPointClouds<PointT>::minBoxQ(typename pcl::PointCloud<PointT>::Ptr cluster)
+{
+    // Find bounding box for one of the clusters
+    PointT minPoint, maxPoint;
+    pcl::getMinMax3D(*cluster, minPoint, maxPoint);
+
+    //copy point cloud
+    typename pcl::PointCloud<PointT>::Ptr Cluster2D(new pcl::PointCloud<PointT>);
+    pcl::copyPointCloud(*cluster, *Cluster2D);
+    //set height to 0
+    for(int nIndex = 0; nIndex < Cluster2D->points.size(); nIndex++) {
+        Cluster2D->points[nIndex].z = minPoint.z;
+    }
+
+    //calculate 2D hull
+    typename pcl::PointCloud<PointT>::Ptr planeHull(new pcl::PointCloud<PointT>);
+    calculate2DHull(Cluster2D, planeHull);
+
+    // calculate minBox
+    BoxQ box;
+    Minbox<PointT> minBox;
+    minBox.ReconstructPolygon(planeHull, box);
+    // calculate bboxQuaternion
+    Eigen::Matrix3f rotational_matrix;
+
+    rotational_matrix << box.direction[0], -box.direction[1], 0.0,
+                         box.direction[1], box.direction[0], 0.0,
+                         0.0, 0.0, 1.0;
+
+    Eigen::Quaternionf quat(rotational_matrix);
+    box.bboxQuaternion = quat;
+    box.cube_height = maxPoint.z - minPoint.z;
+    return box;
+}
+
+template<typename PointT>
+typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::calculate2DHull(
+        typename pcl::PointCloud<PointT>::Ptr Cluster2D,
+        typename pcl::PointCloud<PointT>::Ptr planeHull)
+{
+    ConvexHull2DXY<PointT> hull;
+    hull.setInputCloud(Cluster2D);
+    hull.setDimension(2);
+    std::vector<pcl::Vertices> poly_vt;
+    hull.Reconstruct2dxy (planeHull, &poly_vt);
+    return planeHull;
 }

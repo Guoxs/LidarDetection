@@ -6,9 +6,15 @@ struct BoxQ
 {
 	Eigen::Vector3f bboxTransform;
 	Eigen::Quaternionf bboxQuaternion;
+    Eigen::Vector3f direction;
 	float cube_length;
     float cube_width;
     float cube_height;
+
+    Eigen::Vector3f vertex1;
+    Eigen::Vector3f vertex2;
+    Eigen::Vector3f vertex3;
+    Eigen::Vector3f vertex4;
 };
 struct Box
 {

@@ -16,6 +16,7 @@
 
 #include "DBSCAN/DBSCAN_kdtree.h"
 #include "render/box.h"
+#include "minbox/convex_hullxy.h"
 
 template<typename PointT>
 class ProcessPointClouds {
@@ -58,6 +59,12 @@ public:
     Box boundingBox(typename pcl::PointCloud<PointT>::Ptr cluster);
 
     BoxQ boundingBoxQ(typename pcl::PointCloud<PointT>::Ptr cluster);
+
+    BoxQ minBoxQ(typename pcl::PointCloud<PointT>::Ptr cluster);
+
+    void calculate2DHull(
+            typename pcl::PointCloud<PointT>::Ptr Cluster2D,
+            typename pcl::PointCloud<PointT>::Ptr planeHull);
 };
 
 #endif //LIDARDETECTION_PROCESSPOINTCLOUDS_H

@@ -8,8 +8,8 @@
 #include "processPointClouds.cpp"
 
 //set point cloud range
-Eigen::Vector4f minPoint(0, -55, -5, 1);
-Eigen::Vector4f maxPoint( 100, 100, 15, 1);
+const Eigen::Vector4f minPoint(0, -55, -5, 1);
+const Eigen::Vector4f maxPoint( 100, 100, 15, 1);
 //whether recreate background file
 bool recordBackground = false;
 
@@ -192,8 +192,12 @@ void lidarDetection(pcl::visualization::PCLVisualizer::Ptr& viewer,
         pointProcessor->numPoints(cluster);
         renderPointCloud(viewer,cluster,"foreCloud"+std::to_string(clusterId), colors[clusterId]);
         std::cout<<"ClusterId: " << clusterId<<std::endl;
+        if(cluster->points.size() < 4){
+            ++clusterId;
+            continue;
+        }
         //render box;
-        BoxQ box = pointProcessor->boundingBoxQ(cluster);
+        BoxQ box = pointProcessor->minBoxQ(cluster);
         renderBox(viewer, box, clusterId);
         ++clusterId;
     }
